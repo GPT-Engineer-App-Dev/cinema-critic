@@ -1,7 +1,46 @@
-import { Box, Container, Flex, Heading, HStack, IconButton, Image, Input, Link, Text, VStack } from "@chakra-ui/react";
-import { FaSearch, FaFacebook, FaTwitter, FaInstagram } from "react-icons/fa";
+import { Box, Container, Flex, Heading, HStack, IconButton, Image, Input, Link, Text, VStack, useToast } from "@chakra-ui/react";
+import { FaSearch, FaFacebook, FaTwitter, FaInstagram, FaStar } from "react-icons/fa";
+import { useState } from "react";
+
+const StarRating = ({ rating, onRate }) => {
+  const [hover, setHover] = useState(null);
+
+  return (
+    <HStack spacing={1}>
+      {[...Array(5)].map((_, index) => {
+        const ratingValue = index + 1;
+        return (
+          <IconButton
+            key={index}
+            icon={<FaStar />}
+            color={ratingValue <= (hover || rating) ? "yellow.400" : "gray.300"}
+            onClick={() => onRate(ratingValue)}
+            onMouseEnter={() => setHover(ratingValue)}
+            onMouseLeave={() => setHover(null)}
+            variant="ghost"
+            aria-label={`Rate ${ratingValue} stars`}
+          />
+        );
+      })}
+    </HStack>
+  );
+};
 
 const Index = () => {
+  const [ratings, setRatings] = useState({});
+  const toast = useToast();
+
+  const handleRate = (movieId, rating) => {
+    setRatings({ ...ratings, [movieId]: rating });
+    toast({
+      title: "Rating submitted.",
+      description: `You rated ${rating} stars.`,
+      status: "success",
+      duration: 2000,
+      isClosable: true,
+    });
+  };
+
   return (
     <Box>
       {/* Header */}
@@ -37,8 +76,9 @@ const Index = () => {
             <Box bg="gray.100" p={4} borderRadius="md" width="300px" m={2}>
               <Image src="/path-to-movie-poster.jpg" alt="Movie Poster" borderRadius="md" mb={4} />
               <Heading as="h3" size="md" mb={2}>Movie Title</Heading>
-              <Text fontSize="sm" mb={2}>Rating: 4.5/5</Text>
-              <Text fontSize="sm">A short snippet of the review goes here. It should be enticing and give a glimpse of the review content.</Text>
+              <Text fontSize="sm" mb={2}>Rating: {ratings["movie1"] || 0}/5</Text>
+              <StarRating rating={ratings["movie1"] || 0} onRate={(rating) => handleRate("movie1", rating)} />
+              <Text fontSize="sm" mt={2}>A short snippet of the review goes here. It should be enticing and give a glimpse of the review content.</Text>
             </Box>
             {/* Repeat the above Box for more review cards */}
           </Flex>
